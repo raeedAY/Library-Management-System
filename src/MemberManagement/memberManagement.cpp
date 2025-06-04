@@ -1,0 +1,101 @@
+#include "../../include/memberManagement.h"
+#include "../../include/adminSecurity.h"
+#include "../../include/member.h"
+#include "../../include/ui.h"
+
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+
+using namespace std;
+namespace fs = filesystem;
+
+void addMember(Member& member) {
+    clearScreen();
+    cout << "Enter the User's name: ";
+    cin >> member.name;
+    cout << "Enter the User's contact information: ";
+    cin >> member.contactInfo;
+    cout << "Enter the User's username: ";
+    cin >> member.username;
+    cout << "Enter the User's password: ";
+    string password;
+    cin >> password;
+    
+    string hashedPassword = hashPassword(password);
+    member.password = "";
+    
+    int nextId = 1;
+    auto members = listAllMembers();
+    if (!members.empty()) {
+        for (const auto& m : members) {
+            if (m.Id >= nextId) {
+                nextId = m.Id + 1;
+            }
+        }
+    }
+    member.Id = nextId;
+    
+    if (member.membershipType.empty()) {
+        member.membershipType = "member";
+    }
+    member.isBlacklisted = false;
+    
+    // make sure that data/ exists
+    fs::path dataDirPath = "data";
+    if (!fs::exists(dataDirPath)) {
+        try {
+            fs::create_directory(dataDirPath);
+        } catch (const fs::filesystem_error& e) {
+            cerr << "Error: Could not create directory 'data'. " << e.what() << endl;
+            return;
+        }
+    }
+    
+    ofstream outfile;
+    outfile.open("data/members.txt", ios::app);
+    if (!outfile.is_open()) {
+        cerr << "Error: Could not open members.txt for writing" << endl;
+        return;
+    }
+    
+    // format: ID|name|contactInfo|username|hashedPassword|membershipType|isBlacklisted
+    outfile << member.Id << "|" << member.name << "|" << member.contactInfo << "|" 
+           << member.username << "|" << hashedPassword << "|" << member.membershipType 
+           << "|" << member.isBlacklisted << endl;
+    outfile.close();
+
+    cout << "User added successfully!" << endl;
+}
+
+vector<Member> listAllMembers() {
+    // put ur implementation here
+}
+
+bool editMember(int memberId) {
+    clearScreen();
+    // put ur implementation here
+}
+
+bool saveMembers() {
+    // put ur implementation here
+}
+
+bool deleteMember(int memberId) {
+    clearScreen();
+    // put ur implementation here
+}
+
+Member searchMember(int memberId) {
+    clearScreen();
+    // put ur implementation here
+}
+
+bool updateMemberStatus(int memberId, bool isBlacklisted) {
+    clearScreen();
+    // put ur implementation here
+}
+
+bool checkBorrowingLimit(int memberId) {
+    // put ur implementation here
+}
