@@ -105,9 +105,55 @@ Member searchMember(int memberId) {
 
 bool updateMemberStatus(int memberId, bool isBlacklisted) {
     clearScreen();
-    // put ur implementation here
+    vector<Member> members = listAllMembers();
+    bool memberFound = false;
+    
+    for (auto& member : members) {
+        if (member.Id == memberId) {
+            member.isBlacklisted = isBlacklisted;
+            memberFound = true;
+            break;
+        }
+    }
+    
+    if (!memberFound) {
+        cout << "Member with ID " << memberId << " not found." << endl;
+        return false;
+    }
+    
+    // Open the file for writing (overwrite)
+    ofstream outfile("data/members.txt");
+    if (!outfile.is_open()) {
+        cerr << "Error: Could not open members.txt for writing" << endl;
+        return false;
+    }
+    
+    // Write all members back to the file
+    for (const auto& member : members) {
+        outfile << member.Id << "|" << member.name << "|" << member.contactInfo << "|" 
+               << member.username << "|" << member.password << "|" << member.membershipType 
+               << "|" << member.isBlacklisted << endl;
+    }
+    outfile.close();
+    
+    cout << "Member status updated successfully!" << endl;
+    return true;
 }
 
 bool checkBorrowingLimit(int memberId) {
-    // put ur implementation here
+    vector<Member> members = listAllMembers();
+    
+    for (const auto& member : members) {
+        if (member.Id == memberId) {
+            // If member is blacklisted, they cannot borrow
+            if (member.isBlacklisted) {
+                cout << "This member is blacklisted and cannot borrow books." << endl;
+                return false;
+            }
+            return true;
+        }
+    }
+    
+    cout << "Member with ID " << memberId << " not found." << endl;
+    return false;
 }
