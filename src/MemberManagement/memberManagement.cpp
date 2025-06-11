@@ -80,11 +80,23 @@ bool editMember(int memberId) {
 bool saveMembers() {
     // put ur implementation here
 }
-
 bool deleteMember(int memberId) {
     clearScreen();
-    // put ur implementation here
+    auto members = listAllMembers();
+    auto it = remove_if(members.begin(), members.end(),
+        [&](const Member& m) { return m.Id == memberId; });
+    if (it != members.end()) {
+        members.erase(it, members.end());
+        // Save updated members list to file here, e.g., saveMembers(members);
+        cout << "Member deleted successfully.\n";
+        return true;
+    } else {
+        cout << "Member not found.\n";
+        return false;
+    }
 }
+
+
 
 Member searchMember(int memberId) {
     clearScreen();

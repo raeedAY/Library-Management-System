@@ -132,8 +132,9 @@ void displayLibrarianMenu(const Member& loggedInUser) {
             cout << "1. Add New Book" << endl;
             cout << "2. Edit Book" << endl;
             cout << "3. Search Books" << endl;
-            cout << "4. List All Books" << endl;
-            cout << "5. Back to Main Menu" << endl;
+            cout<< " 4. Delete Book" <<endl;
+            cout << "5. List All Books" << endl;
+            cout << "6. Back to Main Menu" << endl;
             cout << "--------------------------------------" << endl;
             cout << "Enter your choice: ";
             

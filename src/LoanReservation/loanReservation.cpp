@@ -16,8 +16,19 @@ bool borrowBook(const Member& member, const string& ISBN) {
 
 bool returnBook(const Member& member, const string& ISBN) {
     clearScreen();
-    // put ur implementation here
+
+    vector<Book> books = listAllBooks();
+    
+    for (const auto& book : books) {
+        if (book.ISBN == ISBN) {
+            // Check if the book's status is "available"
+            return book.status == "available";
+        }
+    }
+    
+    return false;
 }
+ 
 
 vector<Book> viewBorrowedBooks(const Member& member) {
     clearScreen();
