@@ -121,24 +121,24 @@ bool cancelReservation(const Member& member, const string& ISBN) {
     clearScreen();
     
     loadReservations();
-    bool found = false;
-    
-    for (auto it = reservations.begin(); it != reservations.end(); ++it) {
-        if (it->ISBN == ISBN && it->memberId == member.Id) {
-            reservations.erase(it);
+     bool found = false;
+
+    for (int i = 0; i < reservations.size(); ++i) {
+        if (reservations[i].ISBN == ISBN && reservations[i].memberId == member.Id) {
+            reservations.erase(reservations.begin() + i);
             found = true;
             break;
         }
     }
-    
+
     if (found) {
         saveReservations();
         cout << "Reservation cancelled successfully!" << endl;
         return true;
+    } else {
+        cout << "No reservation found for this book." << endl;
+        return false;
     }
-    
-    cout << "No reservation found for this book." << endl;
-    return false;
 }
 
 vector<Book> viewReservedBooks(const Member& member) {
