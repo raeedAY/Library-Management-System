@@ -56,6 +56,19 @@ bool borrowBook(const Member& member, const string& ISBN) {
 
 bool returnBook(const Member& member, const string& ISBN) {
     clearScreen();
+<<<<<<< HEAD
+
+    vector<Book> books = listAllBooks();
+    
+    for (const auto& book : books) {
+        if (book.ISBN == ISBN) {
+            // Check if the book's status is "available"
+            return book.status == "available";
+        }
+    }
+    
+    return false;
+=======
     // Check if anyone has reserved this book
     loadReservations();
     for (const auto& res : reservations) {
@@ -65,7 +78,9 @@ bool returnBook(const Member& member, const string& ISBN) {
         }
     }
     return true;
+>>>>>>> f6324e34cc8f59444dcb74d5d0f308702d10ca63
 }
+ 
 
 vector<Book> viewBorrowedBooks(const Member& member) {
     clearScreen();

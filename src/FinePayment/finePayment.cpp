@@ -31,3 +31,16 @@ double getTotalFineAmount(const Member& member) {
 bool checkMemberHasFines(const Member& member) {
     // put ur implementation here
 }
+ bool deleteFine(const string& memberId) {
+    auto it = remove_if(fines.begin(), fines.end(),
+        [&](const Fine& f) { return f.memberId == memberId; });
+    if (it != fines.end()) {
+        fines.erase(it, fines.end());
+        cout << "Fine deleted successfully.\n";
+        return true;
+    } else {
+        cout << "Fine not found for this member.\n";
+        return false;
+    }
+}
+  

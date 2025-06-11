@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include <vector>
+#include <unordered_map>
 
 namespace fs = std::filesystem;
 
@@ -71,17 +71,19 @@ void editBook(const string& ISBN) {
     outFile.close();
 
 }
-
 void removeBook(const string& ISBN) {
     clearScreen();
-    // Implementation to be added 
+    unordered_map<string, Book> books = loadBooks(); // Load books from storage
+    auto it = books.find(ISBN);
+    if (it != books.end()) {
+        books.erase(it);
+        saveBooks(books); // Save updated books to storage
+        cout << "Book deleted successfully.\n";
+    } else {
+        cout << "Book not found.\n";
+    }
 }
 
-vector<Book> listAllBooks() {
-    vector<Book> books;
-    // Implementation to be added 
-    return books;
-}
 
 bool saveBooks() {
     // Implementation to be added 
@@ -93,15 +95,3 @@ bool loadBooks() {
     return true;
 }
 
-bool isBookAvailable(const string& ISBN) {
-    vector<Book> books = listAllBooks();
-    
-    for (const auto& book : books) {
-        if (book.ISBN == ISBN) {
-            // Check if the book's status is "available"
-            return book.status == "available";
-        }
-    }
-    
-    return false;
-}
