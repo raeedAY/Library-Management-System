@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <ctime>
 
 using namespace std;
 
@@ -18,9 +19,23 @@ struct Statistics {
     int memberCount;
 };
 
+struct AuditLog {
+    time_t timestamp;
+    string action;      // "ADD", "DELETE", "EDIT"
+    string bookISBN;
+    string bookTitle;
+    int userId;
+    string userName;
+};
+
 Statistics StatisticsDashboard();
 vector<Book> getMostPopularBooks(int limit);
 vector<Member> getMostActiveMembers(int limit);
+
+// Audit logging functions
+void logBookAction(const string& action, const Book& book, const Member& user);
+vector<AuditLog> getBookAuditLogs();
+void saveAuditLog(const AuditLog& log);
 
     // add ur definitions here
 

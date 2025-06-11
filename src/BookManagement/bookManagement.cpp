@@ -1,11 +1,11 @@
-#include "../../include/bookManagement.h"
-#include "../../include/member.h"
-#include "../../include/ui.h"
+#include "../include/bookManagement.h"
+#include "../include/member.h"
+#include "../include/ui.h"
 
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include <unordered_map>
+#include <vector>
 
 namespace fs = std::filesystem;
 
@@ -32,7 +32,7 @@ void addBook(Book& book) {
 
 void editBook(const string& ISBN) {
     clearScreen();
-    unordered_map<string, Book> books = loadBooks();
+    vector<Book> books = loadBooks();
     
     for (auto& book : books) {
         if (book.ISBN == ISBN) {
@@ -51,27 +51,30 @@ void editBook(const string& ISBN) {
         }
     }
 }
+
 void removeBook(const string& ISBN) {
     clearScreen();
-    unordered_map<string, Book> books = loadBooks(); // Load books from storage
-    auto it = books.find(ISBN);
-    if (it != books.end()) {
-        books.erase(it);
-        saveBooks(books); // Save updated books to storage
-        cout << "Book deleted successfully.\n";
-    } else {
-        cout << "Book not found.\n";
+    vector<Book> books = loadBooks();
+    
+    for (auto it = books.begin(); it != books.end(); ++it) {
+        if (it->ISBN == ISBN) {
+            books.erase(it);
+            saveBooks(books);
+            cout << "Book deleted successfully.\n";
+            return;
+        }
     }
+    cout << "Book not found.\n";
 }
 
-
-bool saveBooks() {
+bool saveBooks(const vector<Book>& books) {
     // Implementation to be added 
     return true;
 }
 
-bool loadBooks() {
-    // Implementation to be added
-    return true;
+vector<Book> loadBooks() {
+    vector<Book> books;
+    // TODO: Implement actual loading logic
+    return books;
 }
 

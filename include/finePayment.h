@@ -10,7 +10,12 @@
 using namespace std;
 
 struct Fine {
-    // int fineId etc
+    int fineId;
+    string memberId;
+    string ISBN;
+    double amount;
+    string reason;
+    bool isPaid;
 };
 
 bool addFine(const Member& member, const string& ISBN, double amount, const string& reason);
@@ -18,6 +23,7 @@ bool payFine(int fineId, double amount);
 vector<Fine> getMemberFines(const Member& member);
 double getTotalFineAmount(const Member& member);
 bool checkMemberHasFines(const Member& member);
+bool applyFineExemption(int fineId, const string& exemptionReason);
 
     // add ur definitions here
 

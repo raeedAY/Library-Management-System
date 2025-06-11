@@ -56,29 +56,33 @@ bool borrowBook(const Member& member, const string& ISBN) {
 
 bool returnBook(const Member& member, const string& ISBN) {
     clearScreen();
-<<<<<<< HEAD
-
+    
+    // First check if the book exists and update its status
     vector<Book> books = listAllBooks();
+    bool bookFound = false;
     
     for (const auto& book : books) {
         if (book.ISBN == ISBN) {
-            // Check if the book's status is "available"
-            return book.status == "available";
-        }
-    }
-    
-    return false;
-=======
-    // Check if anyone has reserved this book
-    loadReservations();
-    for (const auto& res : reservations) {
-        if (res.ISBN == ISBN) {
-            cout << "Notification: Book " << ISBN << " is now available for member " << res.memberId << endl;
+            bookFound = true;
+            // Check if anyone has reserved this book
+            loadReservations();
+            for (const auto& res : reservations) {
+                if (res.ISBN == ISBN) {
+                    cout << "Notification: Book " << ISBN << " is now available for member " << res.memberId << endl;
+                    break;
+                }
+            }
             break;
         }
     }
+    
+    if (!bookFound) {
+        cout << "Book with ISBN " << ISBN << " not found." << endl;
+        return false;
+    }
+    
+    cout << "Book returned successfully!" << endl;
     return true;
->>>>>>> f6324e34cc8f59444dcb74d5d0f308702d10ca63
 }
  
 

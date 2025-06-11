@@ -3,16 +3,66 @@
 #include "../../include/bookManagement.h"
 #include "../../include/memberManagement.h"
 #include "../../include/ui.h"
-
+#include <algorithm>  // Add this for sort
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <ctime>
 
 using namespace std;
 
-SystemStatus StatisticsDashboard() {
+const string AUDIT_LOG_FILE = "audit_logs.txt";
+
+Statistics StatisticsDashboard() {
     clearScreen();
-    // put ur implementation here
+    Statistics stats = {0, 0, 0, 0, 0, 0};  // Initialize with default values
+    return stats;
 }
+
+void logBookAction(const string& action, const Book& book, const Member& user) {
+    AuditLog log;
+    log.timestamp = time(nullptr);
+    log.action = action;
+    log.bookISBN = book.ISBN;
+    log.bookTitle = book.title;
+    log.userId = user.Id;
+    log.userName = user.name;
+    
+    saveAuditLog(log);
+}
+
+void saveAuditLog(const AuditLog& log) {
+    ofstream logFile(AUDIT_LOG_FILE, ios::app);
+    if (logFile.is_open()) {
+        logFile << ctime(&log.timestamp) 
+                << "Action: " << log.action << "\n"
+                << "Book: " << log.bookTitle << " (ISBN: " << log.bookISBN << ")\n"
+                << "User: " << log.userName << " (ID: " << log.userId << ")\n"
+                << "----------------------------------------\n";
+        logFile.close();
+    }
+}
+
+vector<AuditLog> getBookAuditLogs() {
+    vector<AuditLog> logs;
+    string line;
+    ifstream logFile(AUDIT_LOG_FILE);
+    
+    if (!logFile.is_open()) {
+        cout << "No audit logs found.\n";
+        return logs;
+    }
+
+    cout << "\nSystem Audit Logs:\n";
+    cout << "----------------------------------------\n";
+    while (getline(logFile, line)) {
+        cout << line << endl;
+    }
+    logFile.close();
+    
+    return logs;
+}
+
 vector<Book> getMostPopularBooks(int limit) {
     clearScreen();
     vector<Book> books = listAllBooks(); // Load all books
@@ -38,6 +88,7 @@ vector<Book> getMostPopularBooks(int limit) {
     }
     return books;
 }
+
 vector<Member> getMostActiveMembers(int limit) {
     clearScreen();
     // put ur implementation here

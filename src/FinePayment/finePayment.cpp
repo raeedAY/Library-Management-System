@@ -6,8 +6,12 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
+
+// Define the fines vector as a global variable
+vector<Fine> fines;
 
 bool addFine(const Member& member, const string& ISBN, double amount, const string& reason) {
     clearScreen();
@@ -31,7 +35,8 @@ double getTotalFineAmount(const Member& member) {
 bool checkMemberHasFines(const Member& member) {
     // put ur implementation here
 }
- bool deleteFine(const string& memberId) {
+
+bool deleteFine(const string& memberId) {
     auto it = remove_if(fines.begin(), fines.end(),
         [&](const Fine& f) { return f.memberId == memberId; });
     if (it != fines.end()) {
@@ -42,5 +47,49 @@ bool checkMemberHasFines(const Member& member) {
         cout << "Fine not found for this member.\n";
         return false;
     }
+}
+
+bool applyFineExemption(int fineId, const string& exemptionReason) {
+    // Valid exemption reasons
+    const vector<string> validReasons = {
+        "medical emergency",
+        "natural disaster",
+        "family emergency",
+        "university closure",
+        "documented technical issue"
+    };
+
+    // Check if the exemption reason is valid
+    bool isValidReason = false;
+    for (const auto& reason : validReasons) {
+        if (exemptionReason == reason) {
+            isValidReason = true;
+            break;
+        }
+    }
+
+    if (!isValidReason) {
+        cout << "Invalid exemption reason. Valid reasons are:\n";
+        for (const auto& reason : validReasons) {
+            cout << "- " << reason << "\n";
+        }
+        return false;
+    }
+
+    // Find the fine with the given ID
+    for (auto& fine : fines) {
+        if (fine.fineId == fineId) {
+            // Apply the exemption by setting the amount to 0 and marking it as paid
+            fine.amount = 0.0;
+            fine.isPaid = true;
+            fine.reason += " (Exempted - " + exemptionReason + ")";
+            
+            cout << "Fine exemption applied successfully.\n";
+            return true;
+        }
+    }
+
+    cout << "Fine not found with ID: " << fineId << "\n";
+    return false;
 }
   
