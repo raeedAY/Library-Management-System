@@ -70,8 +70,43 @@ void addMember(Member& member) {
 }
 
 vector<Member> listAllMembers() {
-    // put ur implementation here
+      vector<Member> members;
+    ifstream infile("data/members.txt");
+
+    if (!infile.is_open()) {
+        cerr << "Error: Could not open members.txt for reading" << endl;
+        return members;
+    }
+
+    string line;
+    while (getline(infile, line)) {
+        Member member;
+        int fieldIndex = 0;
+        string temp = "";
+        for (int i = 0; i < line.length(); ++i) {
+            if (line[i] == '|') {
+                switch (fieldIndex) {
+                    case 0: member.Id = stoi(temp); break;
+                    case 1: member.name = temp; break;
+                    case 2: member.contactInfo = temp; break;
+                    case 3: member.username = temp; break;
+                    case 4: member.password = temp; break;
+                    case 5: member.membershipType = temp; break;
+                }
+                temp = "";
+                fieldIndex++;
+            } else {
+                temp += line[i];
+            }
+        }
+        member.isBlacklisted = (temp == "1" || temp == "true");
+        members.push_back(member);
+    }
+
+    infile.close();
+    return members;
 }
+
 
 bool editMember(int memberId) {
     clearScreen();

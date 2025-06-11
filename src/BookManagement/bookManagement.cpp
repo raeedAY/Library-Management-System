@@ -32,10 +32,11 @@ void addBook(Book& book) {
 
 void editBook(const string& ISBN) {
     clearScreen();
-    vector<Book> books = loadBooks();
+    unordered_map<string, Book> books = loadBooks();
     
     for (auto& book : books) {
         if (book.ISBN == ISBN) {
+            bookfound = true;
             cout << "Current book status: " << book.status << endl;
             cout << "Enter new status (available/borrowed/lost): ";
             string newStatus;
@@ -50,6 +51,24 @@ void editBook(const string& ISBN) {
             break;
         }
     }
+    if(!bookfound){
+        cout << "book with ISBN" << ISBN << " not found."<< endl;
+        return;
+    }
+     
+    ofstream outFile("data/books.txt");
+    if (!outFile.is_open()) {
+        cerr << "Error: Could not open books.txt for writing." << endl;
+        return;
+    }
+
+    for (Book& b : books) {
+        outFile << b.ISBN << "|" << b.title << "|" << b.author << "|"
+                << b.genre << "|" << b.quantity << "|" << b.status << endl;
+    }
+
+    outFile.close();
+
 }
 
 void removeBook(const string& ISBN) {
