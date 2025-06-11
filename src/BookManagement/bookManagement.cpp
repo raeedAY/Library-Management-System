@@ -6,6 +6,8 @@
 #include <fstream>
 #include <filesystem>
 #include <vector>
+#include <unordered_map>
+#include <algorithm>
 
 namespace fs = std::filesystem;
 
@@ -32,11 +34,12 @@ void addBook(Book& book) {
 
 void editBook(const string& ISBN) {
     clearScreen();
-    unordered_map<string, Book> books = loadBooks();
+    vector<Book> books = loadBooks();
+    bool bookFound = false;
     
     for (auto& book : books) {
         if (book.ISBN == ISBN) {
-            bookfound = true;
+            bookFound = true;
             cout << "Current book status: " << book.status << endl;
             cout << "Enter new status (available/borrowed/lost): ";
             string newStatus;
@@ -51,8 +54,8 @@ void editBook(const string& ISBN) {
             break;
         }
     }
-    if(!bookfound){
-        cout << "book with ISBN" << ISBN << " not found."<< endl;
+    if(!bookFound){
+        cout << "Book with ISBN " << ISBN << " not found." << endl;
         return;
     }
      
@@ -62,38 +65,85 @@ void editBook(const string& ISBN) {
         return;
     }
 
-    for (Book& b : books) {
+    for (const Book& b : books) {
         outFile << b.ISBN << "|" << b.title << "|" << b.author << "|"
                 << b.genre << "|" << b.quantity << "|" << b.status << endl;
     }
 
     outFile.close();
-
 }
 
 void removeBook(const string& ISBN) {
     clearScreen();
     vector<Book> books = loadBooks();
     
-    for (auto it = books.begin(); it != books.end(); ++it) {
-        if (it->ISBN == ISBN) {
-            books.erase(it);
-            saveBooks(books);
+    auto it = find_if(books.begin(), books.end(),
+                     [&ISBN](const Book& book) { return book.ISBN == ISBN; });
+    
+    if (it != books.end()) {
+        books.erase(it);
+        if (saveBooks(books)) {
             cout << "Book deleted successfully.\n";
-            return;
+        } else {
+            cout << "Error: Failed to save changes after deleting the book.\n";
         }
+    } else {
+        cout << "Book not found.\n";
     }
-    cout << "Book not found.\n";
 }
 
 bool saveBooks(const vector<Book>& books) {
-    // Implementation to be added 
+    ofstream outFile("data/books.txt");
+    if (!outFile.is_open()) {
+        cerr << "Error: Could not open books.txt for writing." << endl;
+        return false;
+    }
+
+    for (const Book& book : books) {
+        outFile << book.ISBN << "|" << book.title << "|" << book.author << "|"
+                << book.genre << "|" << book.quantity << "|" << book.status << endl;
+    }
+
+    outFile.close();
     return true;
 }
 
 vector<Book> loadBooks() {
     vector<Book> books;
-    // TODO: Implement actual loading logic
+    ifstream inFile("data/books.txt");
+    
+    if (!inFile.is_open()) {
+        cerr << "Warning: Could not open books.txt for reading. Starting with empty book list." << endl;
+        return books;
+    }
+
+    string line;
+    while (getline(inFile, line)) {
+        Book book;
+        size_t pos = 0;
+        string token;
+        vector<string> tokens;
+        
+        // Split line by '|' delimiter
+        while ((pos = line.find('|')) != string::npos) {
+            token = line.substr(0, pos);
+            tokens.push_back(token);
+            line.erase(0, pos + 1);
+        }
+        tokens.push_back(line); // Add the last token
+        
+        if (tokens.size() == 6) {
+            book.ISBN = tokens[0];
+            book.title = tokens[1];
+            book.author = tokens[2];
+            book.genre = tokens[3];
+            book.quantity = stoi(tokens[4]);
+            book.status = tokens[5];
+            books.push_back(book);
+        }
+    }
+
+    inFile.close();
     return books;
 }
 
