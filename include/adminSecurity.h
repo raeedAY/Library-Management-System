@@ -7,12 +7,13 @@
 
 using namespace std;
 
-Member checkLogin(string username, string password);
 string hashPassword(const string& password);
+string getUserRole(const string& username);
+Member checkLogin(string username, string password);
 
 // Database backup and restore functions
-bool backupDatabase(const string& backupFilePath);
-bool restoreDatabase(const string& backupFilePath);
+bool backupDatabase();
+bool restoreDatabase();
 
 // put ur definitions here
 
