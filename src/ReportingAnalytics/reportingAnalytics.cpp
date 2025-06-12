@@ -91,5 +91,55 @@ vector<Book> getMostPopularBooks(int limit) {
 
 vector<Member> getMostActiveMembers(int limit) {
     clearScreen();
-    // put ur implementation here
+    vector<Member> members = listAllMembers();
+    if (members.empty()) {
+        cout << "No members in the system.\n";
+        return {};
+    }
+
+    // Count borrows for each member
+    vector<int> borrowCounts(members.size(), 0);
+    ifstream logFile(AUDIT_LOG_FILE);
+    string line;
+    
+    while (getline(logFile, line)) {
+        if (line.find("Action: BORROW") != string::npos) {
+            getline(logFile, line); // Skip book line
+            getline(logFile, line); // Get user line
+            int userId = stoi(line.substr(line.find("ID: ") + 4));
+            
+            // Increment borrow count for this member
+            for (size_t i = 0; i < members.size(); i++) {
+                if (members[i].Id == userId) {
+                    borrowCounts[i]++;
+                    break;
+                }
+            }
+        }
+    }
+    logFile.close();
+
+    // Sort members by borrow count
+    for (size_t i = 0; i < members.size() - 1; i++) {
+        for (size_t j = 0; j < members.size() - i - 1; j++) {
+            if (borrowCounts[j] < borrowCounts[j + 1]) {
+                swap(borrowCounts[j], borrowCounts[j + 1]);
+                swap(members[j], members[j + 1]);
+            }
+        }
+    }
+
+    // Display results
+    cout << "\nMember Activity Report - Frequent Borrowers:\n";
+    for (int i = 0; i < min(limit, static_cast<int>(members.size())); i++) {
+        cout << " • " << members[i].name
+             << " (ID: " << members[i].Id << ") — borrowed "
+             << borrowCounts[i] << " books\n";
+    }
+
+    // Return top members
+    if (members.size() > limit) {
+        members.resize(limit);
+    }
+    return members;
 }

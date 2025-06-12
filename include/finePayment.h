@@ -24,6 +24,7 @@ vector<Fine> getMemberFines(const Member& member);
 double getTotalFineAmount(const Member& member);
 bool checkMemberHasFines(const Member& member);
 bool applyFineExemption(int fineId, const string& exemptionReason);
+bool adjustFineAmount(int fineId, double newAmount, const string& adjustmentReason);
 
     // add ur definitions here
 

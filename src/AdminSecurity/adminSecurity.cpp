@@ -19,8 +19,27 @@ string hashPassword(const string& password) {
 }
     
 
-
+string getUserRole(const string& username) {
+    // Define roles
+    vector<string> librarianUsernames = {"admin", "librarian1", "librarian2"}; // Add more librarian usernames as needed
+    
+    // Check if the username is in the librarian list
+    for (const auto& librarian : librarianUsernames) {
+        if (username == librarian) {
+            return "librarian";
+        }
+    }
+    
+    // If not found in librarian list, return member role
+    return "member";
+}
 
 Member checkLogin(string username, string password) {
-    // put ur implementation here
+    Member user;
+    user.username = username;
+    user.membershipType = getUserRole(username);
+    
+    //i have initialized the chech login you can add your implmentation here
+    
+    return user;
 }
