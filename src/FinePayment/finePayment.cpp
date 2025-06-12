@@ -92,4 +92,36 @@ bool applyFineExemption(int fineId, const string& exemptionReason) {
     cout << "Fine not found with ID: " << fineId << "\n";
     return false;
 }
+
+bool adjustFineAmount(int fineId, double newAmount, const string& adjustmentReason) {
+    // Find the fine with the given ID
+    for (auto& fine : fines) {
+        if (fine.fineId == fineId) {
+            // Validate the new amount is not negative
+            if (newAmount < 0) {
+                cout << "Error: New fine amount cannot be negative.\n";
+                return false;
+            }
+
+            // Calculate the adjustment amount
+            double adjustment = fine.amount - newAmount;
+            
+            // Update the fine amount
+            fine.amount = newAmount;
+            
+            // Add adjustment reason to the fine's reason
+            fine.reason += " (Adjusted - " + adjustmentReason + ")";
+            
+            cout << "Fine amount adjusted successfully.\n";
+            cout << "Previous amount: $" << fine.amount + adjustment << "\n";
+            cout << "New amount: $" << fine.amount << "\n";
+            cout << "Adjustment: $" << adjustment << "\n";
+            
+            return true;
+        }
+    }
+    
+    cout << "Fine not found with ID: " << fineId << "\n";
+    return false;
+}
   
