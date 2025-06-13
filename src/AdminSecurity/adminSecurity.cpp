@@ -19,20 +19,49 @@ string hashPassword(const string& password) {
 }
     
 
+
+const vector<string> VALID_ROLES = {"admin", "librarian", "member"};
+
 string getUserRole(const string& username) {
-    // Define roles
-    vector<string> librarianUsernames = {"admin", "librarian1", "librarian2"}; // Add more librarian usernames as needed
-    
-    // Check if the username is in the librarian list
-    for (const auto& librarian : librarianUsernames) {
-        if (username == librarian) {
-            return "librarian";
+    // Open the members file
+    ifstream memberFile("data/members.txt");
+    if (!memberFile.is_open()) {
+        cerr << "Error: Could not open members.txt for reading" << endl;
+        return "member"; // Default to member role if file can't be opened
+    }
+
+    string line;
+    while (getline(memberFile, line)) {
+        // Split the line by pipe delimiter
+        vector<string> fields;
+        stringstream ss(line);
+        string field;
+        
+        while (getline(ss, field, '|')) {
+            fields.push_back(field);
+        }
+        
+        // Check if we have enough fields and if username matches 
+        if (fields.size() >= 6 && fields[3] == username) {
+            memberFile.close();
+            return fields[5]; // Return the membership type
         }
     }
+    memberFile.close();
+
+    // If user not found in members file, check for admin/librarian
+    if (username == "admin") {
+        return "admin";
+    }
     
-    // If not found in librarian list, return member role
+    if (username == "librarian1" || username == "librarian2") {
+        return "librarian";
+    }
+    
+    // Default to member role if not found
     return "member";
 }
+
 
 Member checkLogin(string username, string password) {
     Member user;
