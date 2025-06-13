@@ -127,6 +127,7 @@ vector<Member> listAllMembers() {
     return members;
 }
 
+
 bool editMember(int memberId) {
     clearScreen();
     vector<Member> members = listAllMembers();
