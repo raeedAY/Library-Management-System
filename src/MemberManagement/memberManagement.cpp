@@ -71,67 +71,61 @@ void addMember(Member& member) {
 
 vector<Member> listAllMembers() {
       vector<Member> members;
+    
+    fs::path dataDirPath = "data";
+    if (!fs::exists(dataDirPath)) {
+        try {
+            fs::create_directory(dataDirPath);
+        } catch (const fs::filesystem_error& e) {
+            cerr << "Error: Could not create directory 'data'. " << e.what() << endl;
+            return members;
+        }
+    }
+    
     ifstream infile("data/members.txt");
 
     if (!infile.is_open()) {
-        cerr << "Error: Could not open members.txt for reading" << endl;
+        ofstream outFile("data/members.txt");
+        if (outFile.is_open()) {
+            string adminPass = hashPassword("admin123");
+            string librarianPass = hashPassword("lib123");
+            string memberPass = hashPassword("member123");
+            
+            outFile << "1|Admin User|admin@example.com|admin|" << adminPass << "|admin|0" << endl;
+            outFile << "2|Librarian User|librarian@example.com|librarian|" << librarianPass << "|librarian|0" << endl;
+            outFile << "3|Regular Member|member@example.com|member|" << memberPass << "|member|0" << endl;
+            outFile.close();
+            
+            infile.open("data/members.txt");
+            if (!infile.is_open()) {
+                return members;
+            }
+        } else {
+            cerr << "Error: Could not create members.txt file" << endl;
         return members;
+        }
     }
 
     string line;
     while (getline(infile, line)) {
         Member member;
-        int fieldIndex = 0;
-        string temp = "";
-        for (int i = 0; i < line.length(); ++i) {
-            if (line[i] == '|') {
-                switch (fieldIndex) {
-                    case 0: member.Id = stoi(temp); break;
-                    case 1: member.name = temp; break;
-                    case 2: member.contactInfo = temp; break;
-                    case 3: member.username = temp; break;
-                    case 4: member.password = temp; break;
-                    case 5: member.membershipType = temp; break;
-                }
-                temp = "";
-                fieldIndex++;
-            } else {
-                temp += line[i];
-            }
-        }
-        member.isBlacklisted = (temp == "1" || temp == "true");
+        stringstream ss(line);
+        
+        char delimiter;
+        ss >> member.Id >> delimiter;
+        getline(ss, member.name, '|');
+        getline(ss, member.contactInfo, '|');
+        getline(ss, member.username, '|');
+        getline(ss, member.password, '|');
+        getline(ss, member.membershipType, '|');
+        ss >> member.isBlacklisted;
+        
         members.push_back(member);
     }
 
     infile.close();
     return members;
 }
-
-
-bool editMember(int memberId) {
-    clearScreen();
-    // put ur implementation here
-}
-
-bool saveMembers() {
-    // put ur implementation here
-}
-bool deleteMember(int memberId) {
-    clearScreen();
-    auto members = listAllMembers();
-    auto it = remove_if(members.begin(), members.end(),
-        [&](const Member& m) { return m.Id == memberId; });
-    if (it != members.end()) {
-        members.erase(it, members.end());
-        // Save updated members list to file here, e.g., saveMembers(members);
-        cout << "Member deleted successfully.\n";
-        return true;
-    } else {
-        cout << "Member not found.\n";
-        return false;
-    }
-}
-
 
 
 Member searchMember(int memberId) {

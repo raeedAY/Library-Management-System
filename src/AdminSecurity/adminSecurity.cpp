@@ -23,43 +23,36 @@ string hashPassword(const string& password) {
 const vector<string> VALID_ROLES = {"admin", "librarian", "member"};
 
 string getUserRole(const string& username) {
-    // Open the members file
     ifstream memberFile("data/members.txt");
     if (!memberFile.is_open()) {
         cerr << "Error: Could not open members.txt for reading" << endl;
-        return "member"; // Default to member role if file can't be opened
+        return "";
     }
 
     string line;
     while (getline(memberFile, line)) {
-        // Split the line by pipe delimiter
-        vector<string> fields;
         stringstream ss(line);
-        string field;
+        int id;
+        string name, contactInfo, user, pass, role;
+        bool blacklisted;
         
-        while (getline(ss, field, '|')) {
-            fields.push_back(field);
-        }
+        char delimiter;
+        ss >> id >> delimiter;
+        getline(ss, name, '|');
+        getline(ss, contactInfo, '|');
+        getline(ss, user, '|');
+        getline(ss, pass, '|');
+        getline(ss, role, '|');
+        ss >> blacklisted;
         
-        // Check if we have enough fields and if username matches 
-        if (fields.size() >= 6 && fields[3] == username) {
+        if (user == username) {
             memberFile.close();
-            return fields[5]; // Return the membership type
+            return role;
         }
     }
+    
     memberFile.close();
-
-    // If user not found in members file, check for admin/librarian
-    if (username == "admin") {
-        return "admin";
-    }
-    
-    if (username == "librarian1" || username == "librarian2") {
-        return "librarian";
-    }
-    
-    // Default to member role if not found
-    return "member";
+    return "";
 }
 
 
