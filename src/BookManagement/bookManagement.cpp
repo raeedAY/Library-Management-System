@@ -40,25 +40,69 @@ void editBook(const string& ISBN) {
     for (auto& book : books) {
         if (book.ISBN == ISBN) {
             bookFound = true;
-            cout << "Current book status: " << book.status << endl;
-            cout << "Enter new status (available/borrowed/lost): ";
-            string newStatus;
-            getline(cin, newStatus);
             
-            if (newStatus == "available" || newStatus == "borrowed" || newStatus == "lost") {
-                book.status = newStatus;
-                cout << "Book status updated to: " << book.status << endl;
-            } else {
-                cout << "Invalid status. Valid options are: available, borrowed, lost" << endl;
+            cout << "Editing Book: " << book.title << " (ISBN: " << book.ISBN << ")" << endl;
+            cout << "1. Edit Title (Current: " << book.title << ")" << endl;
+            cout << "2. Edit Author (Current: " << book.author << ")" << endl;
+            cout << "3. Change Status (Current: " << book.status << ")" << endl;
+            cout << "4. Cancel" << endl;
+            cout << "Enter your choice: ";
+            
+            int choice;
+            cin >> choice;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            
+            switch (choice) {
+                case 1:
+                    cout << "Enter new title: ";
+                    getline(cin, book.title);
+                    break;
+                case 2:
+                    cout << "Enter new author: ";
+                    getline(cin, book.author);
+                    break;
+                case 3: {
+                    cout << "Select new status:" << endl;
+                    cout << "1. Available" << endl;
+                    cout << "2. Borrowed" << endl;
+                    cout << "3. Lost" << endl;
+                    cout << "Enter your choice: ";
+                    int statusChoice;
+                    cin >> statusChoice;
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    
+                    switch (statusChoice) {
+                        case 1:
+                            book.status = "available";
+                            break;
+                        case 2:
+                            book.status = "borrowed";
+                            break;
+                        case 3:
+                            book.status = "lost";
+                            break;
+                        default:
+                            cout << "Invalid choice. Status not changed." << endl;
+                    }
+                    break;
+                }
+                case 4:
+                    cout << "Edit cancelled." << endl;
+                    return;
+                default:
+                    cout << "Invalid choice." << endl;
+                    return;
             }
+            
             break;
         }
     }
-    if(!bookFound){
+    
+    if (!bookFound) {
         cout << "Book with ISBN " << ISBN << " not found." << endl;
         return;
     }
-     
+    
     ofstream outFile("data/books.txt");
     if (!outFile.is_open()) {
         cerr << "Error: Could not open books.txt for writing." << endl;
@@ -66,11 +110,11 @@ void editBook(const string& ISBN) {
     }
 
     for (const Book& b : books) {
-        outFile << b.ISBN << "|" << b.title << "|" << b.author << "|"
-                << b.genre << "|" << b.quantity << "|" << b.status << endl;
+        outFile << b.ISBN << "|" << b.title << "|" << b.author << "|" << b.status << endl;
     }
 
     outFile.close();
+    cout << "Book updated successfully!" << endl;
 }
 
 void removeBook(const string& ISBN) {
