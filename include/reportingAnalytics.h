@@ -3,6 +3,7 @@
 
 #include "member.h"
 #include "bookManagement.h"
+#include "loanReservation.h"
 
 #include <string>
 #include <vector>
@@ -36,7 +37,8 @@ vector<Member> getMostActiveMembers(int limit);
 void logBookAction(const string& action, const Book& book, const Member& user);
 vector<AuditLog> getBookAuditLogs();
 void saveAuditLog(const AuditLog& log);
+void displayOverdueReport();
 
-    // add ur definitions here
+
 
 #endif

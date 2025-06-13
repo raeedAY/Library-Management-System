@@ -15,6 +15,4 @@ Member checkLogin(string username, string password);
 bool backupDatabase();
 bool restoreDatabase();
 
-// put ur definitions here
-
 #endif

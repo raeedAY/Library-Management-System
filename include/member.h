@@ -14,8 +14,9 @@ struct Member {
     string password;
     string membershipType;
     bool isBlacklisted;
+    // int booksBorrowed
 };
 
-    // add ur definitions here
+    
 
 #endif

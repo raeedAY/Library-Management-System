@@ -16,7 +16,6 @@ using namespace std;
 void addBook(Book& book) {
     clearScreen();
     
-    // make sure that data/ exists
     fs::path dataDirPath = "data";
     if (!fs::exists(dataDirPath)) {
         try {
@@ -27,14 +26,24 @@ void addBook(Book& book) {
         }
     }
     
-    // Set initial status as available when adding a new book
     book.status = "available";
-    cout << "New book status set to: " << book.status << endl;
+    
+    ofstream outFile("data/books.txt", ios::app);
+    if (!outFile.is_open()) {
+        cerr << "Error: Could not open books.txt for writing." << endl;
+        return;
+    }
+    
+    outFile << book.ISBN << "|" << book.title << "|" << book.author << "|"
+            << book.genre << "|" << book.quantity << "|" << book.status << endl;
+    
+    outFile.close();
+    cout << "Book added successfully!" << endl;
 }
 
 void editBook(const string& ISBN) {
     clearScreen();
-    vector<Book> books = loadBooks();
+    vector<Book> books = listAllBooks();
     bool bookFound = false;
     
     for (auto& book : books) {
@@ -75,7 +84,7 @@ void editBook(const string& ISBN) {
 
 void removeBook(const string& ISBN) {
     clearScreen();
-    vector<Book> books = loadBooks();
+    vector<Book> books = listAllBooks();
     
     auto it = find_if(books.begin(), books.end(),
                      [&ISBN](const Book& book) { return book.ISBN == ISBN; });
@@ -93,6 +102,16 @@ void removeBook(const string& ISBN) {
 }
 
 bool saveBooks(const vector<Book>& books) {
+    fs::path dataDirPath = "data";
+    if (!fs::exists(dataDirPath)) {
+        try {
+            fs::create_directory(dataDirPath);
+        } catch (const fs::filesystem_error& e) {
+            cerr << "Error: Could not create directory 'data'. " << e.what() << endl;
+            return false;
+        }
+    }
+    
     ofstream outFile("data/books.txt");
     if (!outFile.is_open()) {
         cerr << "Error: Could not open books.txt for writing." << endl;
@@ -108,13 +127,38 @@ bool saveBooks(const vector<Book>& books) {
     return true;
 }
 
-vector<Book> loadBooks() {
+vector<Book> listAllBooks() {
     vector<Book> books;
+    
+    fs::path dataDirPath = "data";
+    if (!fs::exists(dataDirPath)) {
+        try {
+            fs::create_directory(dataDirPath);
+        } catch (const fs::filesystem_error& e) {
+            cerr << "Error: Could not create directory 'data'. " << e.what() << endl;
+            return books;
+        }
+    }
+    
     ifstream inFile("data/books.txt");
     
     if (!inFile.is_open()) {
-        cerr << "Warning: Could not open books.txt for reading. Starting with empty book list." << endl;
-        return books;
+        ofstream outFile("data/books.txt");
+        if (outFile.is_open()) {
+            outFile << "1|The Catcher in the Rye|J.D. Salinger|Fiction|5|available" << endl;
+            outFile << "2|To Kill a Mockingbird|Harper Lee|Fiction|3|available" << endl;
+            outFile << "3|1984|George Orwell|Fiction|4|available" << endl;
+            outFile << "4|The Da Vinci Code|Dan Brown|Mystery|2|available" << endl;
+            outFile << "5|The Hobbit|J.R.R. Tolkien|Fantasy|6|available" << endl;
+            outFile.close();
+            
+            inFile.open("data/books.txt");
+            if (!inFile.is_open()) {
+                return books;
+            }
+        } else {
+            return books;
+        }
     }
 
     string line;
@@ -124,13 +168,12 @@ vector<Book> loadBooks() {
         string token;
         vector<string> tokens;
         
-        // Split line by '|' delimiter
         while ((pos = line.find('|')) != string::npos) {
             token = line.substr(0, pos);
             tokens.push_back(token);
             line.erase(0, pos + 1);
         }
-        tokens.push_back(line); // Add the last token
+        tokens.push_back(line);
         
         if (tokens.size() == 6) {
             book.ISBN = tokens[0];
@@ -145,5 +188,15 @@ vector<Book> loadBooks() {
 
     inFile.close();
     return books;
+}
+
+bool isBookAvailable(const string& ISBN) {
+    vector<Book> books = listAllBooks();
+    for (const auto& book : books) {
+        if (book.ISBN == ISBN) {
+            return book.quantity > 0 && book.status == "available";
+        }
+    }
+    return false;
 }
 

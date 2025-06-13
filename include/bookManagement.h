@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include "book.h"
 
 using namespace std;
 
@@ -21,10 +20,9 @@ void addBook(Book& book);
 void editBook(const string& ISBN);
 void removeBook(const string& ISBN);
 vector<Book> listAllBooks();
-vector<Book> loadBooks();
 bool saveBooks(const vector<Book>& books);
 bool isBookAvailable(const string& ISBN);
 
-    // add ur definitions here
+
 
 #endif 

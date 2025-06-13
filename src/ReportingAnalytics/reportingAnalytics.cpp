@@ -3,19 +3,49 @@
 #include "../../include/bookManagement.h"
 #include "../../include/memberManagement.h"
 #include "../../include/ui.h"
-#include <algorithm>  // Add this for sort
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <ctime>
+#include <filesystem>
+#include <iomanip>
 
 using namespace std;
+namespace fs = filesystem;
 
-const string AUDIT_LOG_FILE = "audit_logs.txt";
+const string AUDIT_LOG_FILE = "data/audit_logs.txt";
 
 Statistics StatisticsDashboard() {
     clearScreen();
-    Statistics stats = {0, 0, 0, 0, 0, 0};  // Initialize with default values
+    Statistics stats;
+    vector<Member> members = listAllMembers();
+    vector<Book> books = listAllBooks();
+
+    stats.totalMembers = members.size();
+    stats.totalBooks = 0;
+    stats.availableBooks = 0;
+    stats.adminCount = 0;
+    stats.librarianCount = 0;
+    stats.memberCount = 0;
+
+    for (const auto& book : books) {
+        stats.totalBooks += book.quantity;
+        if (book.status == "available") {
+            stats.availableBooks += book.quantity;
+        }
+    }
+
+    for (const auto& member : members) {
+        if (member.membershipType == "admin") {
+            stats.adminCount++;
+        } else if (member.membershipType == "librarian") {
+            stats.librarianCount++;
+        } else if (member.membershipType == "member") {
+            stats.memberCount++;
+        }
+    }
+
     return stats;
 }
 
@@ -32,6 +62,16 @@ void logBookAction(const string& action, const Book& book, const Member& user) {
 }
 
 void saveAuditLog(const AuditLog& log) {
+    fs::path dataDirPath = "data";
+    if (!fs::exists(dataDirPath)) {
+        try {
+            fs::create_directory(dataDirPath);
+        } catch (const fs::filesystem_error& e) {
+            cerr << "Error: Could not create directory 'data'. " << e.what() << endl;
+            return;
+        }
+    }
+    
     ofstream logFile(AUDIT_LOG_FILE, ios::app);
     if (logFile.is_open()) {
         logFile << ctime(&log.timestamp) 
@@ -46,9 +86,22 @@ void saveAuditLog(const AuditLog& log) {
 vector<AuditLog> getBookAuditLogs() {
     vector<AuditLog> logs;
     string line;
+    
+    fs::path dataDirPath = "data";
+    if (!fs::exists(dataDirPath)) {
+        try {
+            fs::create_directory(dataDirPath);
+        } catch (const fs::filesystem_error& e) {
+            cerr << "Error: Could not create directory 'data'. " << e.what() << endl;
+            return logs;
+        }
+    }
+    
     ifstream logFile(AUDIT_LOG_FILE);
     
     if (!logFile.is_open()) {
+        ofstream createFile(AUDIT_LOG_FILE);
+        createFile.close();
         cout << "No audit logs found.\n";
         return logs;
     }
@@ -99,7 +152,25 @@ vector<Member> getMostActiveMembers(int limit) {
 
     // Count borrows for each member
     vector<int> borrowCounts(members.size(), 0);
+    
+    fs::path dataDirPath = "data";
+    if (!fs::exists(dataDirPath)) {
+        try {
+            fs::create_directory(dataDirPath);
+        } catch (const fs::filesystem_error& e) {
+            cerr << "Error: Could not create directory 'data'. " << e.what() << endl;
+            return {};
+        }
+    }
+    
     ifstream logFile(AUDIT_LOG_FILE);
+    if (!logFile.is_open()) {
+        ofstream createFile(AUDIT_LOG_FILE);
+        createFile.close();
+        cout << "No audit logs found. Cannot determine active members.\n";
+        return {};
+    }
+    
     string line;
     
     while (getline(logFile, line)) {
@@ -142,4 +213,72 @@ vector<Member> getMostActiveMembers(int limit) {
         members.resize(limit);
     }
     return members;
+}
+
+// Function to display overdue books report
+void displayOverdueReport() {
+    clearScreen();
+    cout << "=======================================================================================================" << endl;
+    cout << "                                  OVERDUE BOOKS REPORT                                                  " << endl;
+    cout << "=======================================================================================================" << endl;
+    
+    // Get all overdue loans
+    vector<Loan> overdueLoans = getOverdueLoans();
+    
+    if (overdueLoans.empty()) {
+        cout << "No overdue books at this time." << endl;
+        cout << "Press Enter to continue...";
+        cin.get();
+        return;
+    }
+    
+    vector<Book> allBooks = listAllBooks();
+    vector<Member> allMembers = listAllMembers();
+    
+    cout << left << setw(30) << "Book Title" << " | " 
+         << setw(15) << "ISBN" << " | " 
+         << setw(20) << "Member Name" << " | " 
+         << setw(10) << "Member ID" << " | " 
+         << "Due Date" << endl;
+    cout << "=======================================================================================================" << endl;
+    
+    for (const auto& loan : overdueLoans) {
+        string bookTitle = "";
+        string memberName = "";
+        
+        // Find book info
+        for (const auto& book : allBooks) {
+            if (book.ISBN == loan.ISBN) {
+                bookTitle = book.title;
+                break;
+            }
+        }
+        
+        // Find member info
+        for (const auto& member : allMembers) {
+            if (member.Id == loan.memberId) {
+                memberName = member.name;
+                break;
+            }
+        }
+        
+        // Format date
+        time_t dueDate = loan.dueDate;
+        struct tm* timeinfo = localtime(&dueDate);
+        char buffer[80];
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d", timeinfo);
+        
+        int daysOverdue = (time(nullptr) - loan.dueDate) / (24 * 60 * 60);
+        
+        cout << left << setw(30) << bookTitle << " | " 
+             << setw(15) << loan.ISBN << " | " 
+             << setw(20) << memberName << " | " 
+             << setw(10) << loan.memberId << " | " 
+             << buffer << " (" << daysOverdue << " days overdue)" << endl;
+    }
+    
+    cout << "=======================================================================================================" << endl;
+    cout << "Total overdue books: " << overdueLoans.size() << endl;
+    cout << "Press Enter to continue...";
+    cin.get();
 }

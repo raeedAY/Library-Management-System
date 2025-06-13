@@ -1,0 +1,5 @@
+Fri Jun 13 09:21:40 2025
+Action: BORROW
+Book: The Catcher in the Rye (ISBN: 1)
+User: Mohammed (ID: 3)
+----------------------------------------

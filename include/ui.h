@@ -2,8 +2,10 @@
 #define UI_H
 
 #include "member.h"
+#include "bookManagement.h"
 
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -15,7 +17,7 @@ void displayBorrowMenu(const Member& loggedInUser);
 void displayReturnMenu(const Member& loggedInUser);
 void displayBookDetailsView(const Book& book);
 void displayMemberDetailsView(const Member& member);
+void displayMemberTable(const vector<Member>& members);
+void displayBookTable(const vector<Book>& books);
 
-    // add ur definitions here
-
-#endif 
+#endif
